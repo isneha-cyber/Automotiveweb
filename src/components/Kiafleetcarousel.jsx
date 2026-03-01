@@ -47,7 +47,7 @@ function getSlot(offset) {
   return String(clamped);
 }
 
-export default function Home() {
+export default function Kiafleet() {
   const [activeTab,   setActiveTab]   = useState(0);
   const [activeIndex, setActiveIndex] = useState(0);
   const [transitioning, setTransitioning] = useState(false);

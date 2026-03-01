@@ -161,7 +161,7 @@ export default function TrustedBanner() {
       `}</style>
 
       {/* OUTER WRAPPER */}
-      <div className="trusted-body bg-[#05141f] sm:py-24 py-12">
+      <div className="trusted-body bg-[#05141f] sm:pt-24 pt-12">
     
         {/* BANNER SECTION */}
         <div

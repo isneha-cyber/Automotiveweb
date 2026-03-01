@@ -207,7 +207,7 @@ export default function Service() {
             </button>
 
             {/* Stats — visible on all breakpoints */}
-            <div className="grid grid-cols-3 gap-6 mt-10 pt-8 border-t border-gray-100">
+            {/* <div className="grid grid-cols-3 gap-6 mt-10 pt-8 border-t border-gray-100">
               {[
                 { value: "25+", label: "Years" },
                 { value: "50+", label: "Dealers" },
@@ -218,7 +218,7 @@ export default function Service() {
                   <p className="text-[10px] text-gray-400 uppercase tracking-widest mt-0.5">{label}</p>
                 </div>
               ))}
-            </div>
+            </div> */}
           </div>
 
           {/* Right: Hero image — spans 3 of 5 columns on lg */}

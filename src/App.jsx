@@ -1,27 +1,21 @@
 import './App.css'
 import Navbar from './components/Navbar'
-import Hero from './components/Hero'
-// import Showcase from './components/Showcase'
-import TrustedBanner from './components/Trustedbanner'
-import Service from './components/Service'
 import Footer from './components/Footer'
-import Blog from './components/Blog'
-import KiaFleetCarousel from './components/Kiafleetcarousel'
-import KiaToutCards from './components/Kiatoutcards'
+import VehiclePage from './pages/VehicledetailPage'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import HomePage from './pages/HomePage'
 
 function App() {
   return (
     <>
+    <BrowserRouter>
     <Navbar/>
-    <Hero/>
-    <KiaToutCards/>
-    {/* <Showcase/> */}
-    <TrustedBanner/>
-<KiaFleetCarousel/>
-    <Service/>
-   
-    <Blog/>
+    <Routes>
+        <Route path="/" element={<HomePage/>} />
+      <Route path="/detailpage" element={<VehiclePage/>} />
+    </Routes>
     <Footer/>
+    </BrowserRouter>
     
     </>
   )

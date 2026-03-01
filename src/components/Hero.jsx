@@ -12,10 +12,9 @@ const slide = {
   cta1: "Ayam Force",
   cta2: "Explore",
   bg: "/images/herovideo.mp4",
-  gradient: "from-black/75 via-black/35 to-transparent",
+  poster: "/images/fallback.jpg",
 };
 
-// GSAP loader
 const loadGSAP = () =>
   new Promise((resolve) => {
     if (window.gsap) return resolve(window.gsap);
@@ -25,108 +24,235 @@ const loadGSAP = () =>
     document.head.appendChild(s);
   });
 
-export default function Hero({ eyebrowRef, titleRef, btnsRef }) {
+export default function Hero() {
   const [gsapReady, setGsapReady] = useState(false);
-  const heroRef = useRef(null);
-  const videoRef = useRef(null);
+  const [navHeight, setNavHeight] = useState(62);
+  const videoRef  = useRef(null);
+  const eyebrowRef = useRef(null);
+  const titleRef   = useRef(null);
+  const btnsRef    = useRef(null);
 
+  // ── Measure actual navbar height ──
   useEffect(() => {
-    loadGSAP().then(() => setGsapReady(true));
+    const measure = () => {
+      const nav = document.querySelector("nav") || document.querySelector("[data-navbar]");
+      if (nav) setNavHeight(nav.offsetHeight);
+      else setNavHeight(62); // fallback
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
   }, []);
 
-  const animateContent = (gsap) => {
-    const els = [eyebrowRef?.current, titleRef?.current, btnsRef?.current].filter(Boolean);
-    if (!els.length) return;
-    gsap.fromTo(
-      els,
-      { y: 45, opacity: 0 },
-      { y: 0, opacity: 1, duration: 1, stagger: 0.15, ease: "power3.out", delay: 0.1 }
-    );
-  };
-
+  // ── GSAP entrance ──
   useEffect(() => {
-    if (gsapReady) animateContent(window.gsap);
-  }, [gsapReady]);
+    loadGSAP().then((gsap) => {
+      setGsapReady(true);
+      const els = [eyebrowRef.current, titleRef.current, btnsRef.current].filter(Boolean);
+      gsap.fromTo(
+        els,
+        { y: 50, opacity: 0 },
+        { y: 0, opacity: 1, duration: 1.1, stagger: 0.16, ease: "power3.out", delay: 0.25 }
+      );
+    });
+  }, []);
 
-  // Handle video playback
+  // ── Autoplay video ──
   useEffect(() => {
     if (videoRef.current) {
-      videoRef.current.play().catch(e => console.log("Video play failed:", e));
+      videoRef.current.play().catch(() => {});
     }
   }, []);
 
   return (
     <section
-      ref={heroRef}
       className="relative w-full overflow-hidden"
-      style={{ height: "100svh", minHeight: "560px" }}
+      style={{
+        // Full viewport minus the navbar so nothing is hidden under it
+        height: `calc(100svh)`,
+        minHeight: "560px",
+      }}
       aria-label="Hero section"
     >
-     {/* ── Background Video ── */}
-<div className="absolute inset-0">
-  <video
-    ref={videoRef}
-    src={slide.bg}
-    className="w-full h-full object-cover object-center"
-    muted
-    loop
-    playsInline
-    autoPlay
-    poster="/images/fallback.jpg"
-  />
-  {/* Left gradient for text legibility */}
-  <div className={`absolute inset-0 bg-gradient-to-r ${slide.gradient}`} />
-  {/* Bottom vignette - fades into page bg color #05141f */}
-  <div
-    className="absolute bottom-0 left-0 right-0 h-48 sm:h-56 md:h-64"
-    style={{ background: 'linear-gradient(to top, #05141f, transparent)' }}
-  />
-  {/* Top vignette */}
-  <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-black/30 to-transparent sm:h-20 md:h-28" />
-</div>
+      {/* ── Background Video ── */}
+      <div className="absolute inset-0 ">
+        <video
+          ref={videoRef}
+          src={slide.bg}
+          poster={slide.poster}
+          className="absolute inset-0 w-full h-full"
+          style={{
+            objectFit: "cover",
+            objectPosition: "center center",
+            // On very small screens, shift the focal point slightly right
+            // so the car/subject stays visible
+          }}
+          muted
+          loop
+          playsInline
+          autoPlay
+          preload="auto"
+        />
+
+        {/* Left-to-right gradient for text legibility */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(105deg, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.38) 45%, rgba(0,0,0,0.08) 100%)",
+          }}
+        />
+
+        {/* Bottom fade into page background */}
+        <div
+          className="absolute bottom-0 left-0 right-0"
+          style={{
+            height: "220px",
+            background: "linear-gradient(to top, #05141f 0%, transparent 100%)",
+          }}
+        />
+
+        {/* Top vignette so navbar text stays readable */}
+        <div
+          className="absolute top-0 left-0 right-0"
+          style={{
+            height: "140px",
+            background: "linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, transparent 100%)",
+          }}
+        />
+      </div>
+
       {/* ── Hero Text Content ── */}
-      <div className="relative z-10 flex flex-col justify-end sm:justify-center h-full pointer-events-none pb-16 sm:pb-0">
-        <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12">
-          
-          {/* Content wrapper for better mobile control */}
-          <div className="w-full max-w-3xl sm:mt-18 mt-0">
-            {/* Eyebrow */}
-            <p
-              ref={eyebrowRef}
-              className="text-white/75 text-xs font-semibold tracking-wider uppercase mb-2 sm:text-sm sm:tracking-[0.3em] sm:mb-3 md:text-base md:mb-4"
-            >
-              {slide.eyebrow}
-            </p>
+      <div
+        className="relative z-10 flex flex-col h-full pointer-events-none"
+        style={{ paddingTop: navHeight }} // push content below navbar
+      >
+        {/* Vertically center on desktop, bottom-align on mobile */}
+        <div className="flex-1 flex flex-col justify-end sm:justify-center">
+          <div className="w-full px-5 sm:px-8 lg:px-14 xl:px-20 pb-14 sm:pb-0">
+            <div className="max-w-2xl lg:max-w-3xl">
 
-            {/* Title */}
-            <h1
-              ref={titleRef}
-              className="text-white font-bold leading-tight mb-4 sm:mb-6 md:mb-9 lg:text-6xl md:text-5xl sm:text-4xl text-3xl whitespace-pre-line"
-            >
-              {slide.title}
-            </h1>
+              {/* Eyebrow */}
+              <p
+                ref={eyebrowRef}
+                className="font-semibold tracking-[0.28em] uppercase mb-3"
+                style={{
+                  color: "rgba(255,255,255,0.7)",
+                  fontSize: "clamp(0.6rem, 1.8vw, 0.875rem)",
+                  opacity: 0, // GSAP will animate in
+                }}
+              >
+                {slide.eyebrow}
+              </p>
 
-            {/* CTA Buttons - Using Flexbox */}
-            <div
-              ref={btnsRef}
-              className="flex flex-col sm:flex-row gap-2 pointer-events-auto sm:gap-4"
-            >
-              <button className="flex items-center justify-center gap-1.5 bg-white text-black text-[10px] font-bold tracking-wider uppercase px-4 py-2.5 min-w-[120px] hover:bg-black hover:text-white transition-all duration-300 rounded-none border border-transparent hover:border-white sm:text-sm sm:px-8 sm:py-3.5 sm:min-w-[160px] sm:gap-2 md:text-base md:px-10 md:py-4">
-                {slide.cta1}
-                <span className="flex items-center transition-transform duration-300 group-hover:translate-x-1">
+              {/* Title */}
+              <h1
+                ref={titleRef}
+                className="font-black leading-[1.06] whitespace-pre-line mb-6 sm:mb-8"
+                style={{
+                  color: "#ffffff",
+                  fontSize: "clamp(2rem, 6vw, 4.5rem)",
+                  letterSpacing: "-0.01em",
+                  textShadow: "0 2px 24px rgba(0,0,0,0.35)",
+                  opacity: 0,
+                }}
+              >
+                {slide.title}
+              </h1>
+
+              {/* CTA Buttons */}
+              <div
+                ref={btnsRef}
+                className="flex flex-row gap-3 pointer-events-auto"
+                style={{ opacity: 0 }}
+              >
+                {/* Primary */}
+                <button
+                  className="group flex items-center gap-2 font-bold tracking-widest uppercase transition-all duration-300"
+                  style={{
+                    background: "#fff",
+                    color: "#05141f",
+                    fontSize: "clamp(0.6rem, 1.4vw, 0.75rem)",
+                    padding: "clamp(10px, 1.5vw, 16px) clamp(16px, 3vw, 40px)",
+                    border: "1.5px solid transparent",
+                    whiteSpace: "nowrap",
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.background = "transparent";
+                    e.currentTarget.style.color = "#fff";
+                    e.currentTarget.style.borderColor = "#fff";
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.background = "#fff";
+                    e.currentTarget.style.color = "#05141f";
+                    e.currentTarget.style.borderColor = "transparent";
+                  }}
+                >
+                  {slide.cta1}
                   <ArrowRight />
-                </span>
-              </button>
-              <button className="flex items-center justify-center gap-1.5 border border-white text-white text-[10px] font-bold tracking-wider uppercase px-4 py-2.5 min-w-[120px] hover:bg-white hover:text-black transition-all duration-300 rounded-none sm:text-sm sm:px-8 sm:py-3.5 sm:min-w-[160px] sm:gap-2 md:text-base md:px-10 md:py-4">
-                {slide.cta2}
-                <span className="flex items-center transition-all duration-300 opacity-0 group-hover:opacity-100 group-hover:translate-x-1">
+                </button>
+
+                {/* Secondary */}
+                <button
+                  className="group flex items-center gap-2 font-bold tracking-widest uppercase transition-all duration-300"
+                  style={{
+                    background: "transparent",
+                    color: "#fff",
+                    fontSize: "clamp(0.6rem, 1.4vw, 0.75rem)",
+                    padding: "clamp(10px, 1.5vw, 16px) clamp(16px, 3vw, 40px)",
+                    border: "1.5px solid rgba(255,255,255,0.55)",
+                    whiteSpace: "nowrap",
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.background = "#fff";
+                    e.currentTarget.style.color = "#05141f";
+                    e.currentTarget.style.borderColor = "#fff";
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.background = "transparent";
+                    e.currentTarget.style.color = "#fff";
+                    e.currentTarget.style.borderColor = "rgba(255,255,255,0.55)";
+                  }}
+                >
+                  {slide.cta2}
                   <ArrowRight />
-                </span>
-              </button>
+                </button>
+              </div>
+
             </div>
           </div>
         </div>
+
+        {/* Scroll indicator */}
+        <div
+          className=" sm:hidden block flex justify-center pb-6 pointer-events-none"
+          style={{ opacity: 0.45 }}
+        >
+          <div className="flex flex-col items-center gap-1.5">
+            <span
+              className="text-white font-medium tracking-[0.22em] uppercase"
+              style={{ fontSize: "9px" }}
+            >
+              Scroll
+            </span>
+            <div
+              className="w-px"
+              style={{
+                height: "28px",
+                background: "linear-gradient(to bottom, rgba(255,255,255,0.7), transparent)",
+                animation: "scrollPulse 2s ease-in-out infinite",
+              }}
+            />
+          </div>
+        </div>
       </div>
+
+      <style>{`
+        @keyframes scrollPulse {
+          0%, 100% { opacity: 0.3; transform: scaleY(0.7); transform-origin: top; }
+          50%       { opacity: 1;   transform: scaleY(1);   transform-origin: top; }
+        }
+      `}</style>
     </section>
   );
 }
