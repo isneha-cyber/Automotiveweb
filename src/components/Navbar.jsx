@@ -115,6 +115,7 @@ function SafeImg({ src, name, className, thumbSize = false }) {
   return <img src={src} alt={name} className={className} onError={() => setErr(true)} />;
 }
 
+
 // ── DESKTOP Vehicle Dropdown ──────────────────────────
 function VehicleDropdown({ isOpen }) {
   const [activeCat, setActiveCat] = useState("SUV_MPV");
@@ -158,7 +159,7 @@ function VehicleDropdown({ isOpen }) {
     <div
       className="absolute top-full left-0 right-0 w-full overflow-hidden transition-all duration-300 ease-in-out"
       style={{
-        maxHeight: isOpen ? "600px" : "0px",
+        maxHeight: isOpen ? "calc(100vh - 62px)" : "0px",
         opacity: isOpen ? 1 : 0,
         pointerEvents: isOpen ? "all" : "none",
       }}
@@ -186,8 +187,14 @@ function VehicleDropdown({ isOpen }) {
           <span className="absolute bottom-0 h-[2px] transition-all duration-300 pointer-events-none" style={{ left: sliderStyle.left, width: sliderStyle.width, background: "#fff" }} />
         </div>
 
-        {/* Three Columns */}
-        <div className="flex" style={{ minHeight: "420px" }}>
+        {/* Three Columns - with scrolling */}
+        <div 
+          className="flex overflow-y-auto" 
+          style={{ 
+            minHeight: "420px",
+            maxHeight: "calc(100vh - 110px)", // 62px navbar + 48px tabs = 110px
+          }}
+        >
           {/* LEFT */}
           <div className="flex-shrink-0 flex flex-col overflow-y-auto" style={{ width: "260px", borderRight: "1px solid rgba(255,255,255,0.07)" }}>
             <div className="flex-1 py-2">
@@ -238,13 +245,42 @@ function VehicleDropdown({ isOpen }) {
             </p>
             <div className="flex flex-col gap-2">
               {vehicle.links.map((link, li) => (
-                <a key={li} href={vehicle.href}
+                <a 
+                  key={li} 
+                  href={vehicle.href}
                   className="flex items-center gap-2 text-[11px] font-bold tracking-widest uppercase transition-all duration-200"
-                  style={link.primary ? { color: "#fff", paddingBottom: "2px", borderBottom: "1px solid rgba(255,255,255,0.3)", width: "fit-content" } : { color: "rgba(255,255,255,0.5)" }}
-                  onMouseEnter={e => e.currentTarget.style.color = "#fff"}
-                  onMouseLeave={e => e.currentTarget.style.color = link.primary ? "#fff" : "rgba(255,255,255,0.5)"}
+                  style={
+                    link.primary 
+                      ? { 
+                          color: "#fff", 
+                          paddingBottom: "2px", 
+                          borderBottom: "1px solid rgba(255,255,255,0.3)", 
+                          width: "fit-content" 
+                        } 
+                      : { 
+                          color: "rgba(255,255,255,0.5)",
+                          paddingBottom: "2px",
+                          borderBottom: "1px solid transparent",
+                        }
+                  }
+                  onMouseEnter={e => {
+                    if (link.primary) {
+                      e.currentTarget.style.color = "#fff";
+                    } else {
+                      e.currentTarget.style.color = "#fff";
+                      e.currentTarget.style.borderBottom = "1px solid rgba(255,255,255,0.3)";
+                    }
+                  }}
+                  onMouseLeave={e => {
+                    if (link.primary) {
+                      e.currentTarget.style.color = "#fff";
+                    } else {
+                      e.currentTarget.style.color = "rgba(255,255,255,0.5)";
+                      e.currentTarget.style.borderBottom = "1px solid transparent";
+                    }
+                  }}
                 >
-                  {link.primary ? <ArrowRight size={11} /> : <ChevRight size={9} />}{link.label}
+                  {link.label} <ArrowRight size={11} />
                 </a>
               ))}
             </div>
@@ -295,14 +331,19 @@ function MobileVehiclePanel({ isOpen }) {
   return (
     <div
       className="overflow-hidden transition-all duration-300 ease-in-out"
-      style={{ maxHeight: isOpen ? "75vh" : "0px", opacity: isOpen ? 1 : 0 }}
+      style={{ 
+        maxHeight: isOpen ? "calc(100vh - 200px)" : "0px", 
+        opacity: isOpen ? 1 : 0,
+        position: "relative",
+        zIndex: 50
+      }}
     >
       <div
         ref={scrollRef}
         style={{
           background: "#060d1a",
           borderTop: "1px solid rgba(255,255,255,0.07)",
-          maxHeight: "75vh",
+          maxHeight: "calc(100vh - 200px)",
           overflowY: "auto",
           overflowX: "hidden",
           position: "relative",
@@ -313,13 +354,19 @@ function MobileVehiclePanel({ isOpen }) {
         {selectedVehicle && (
           <div
             style={{
-              position: "absolute", inset: 0, zIndex: 20,
+              position: "absolute", 
+              top: 0, 
+              left: 0, 
+              right: 0, 
+              bottom: 0, 
+              zIndex: 60,
               background: "#060d1a",
               transform: detailAnim ? "translateX(0)" : "translateX(100%)",
               transition: "transform 0.24s cubic-bezier(0.4,0,0.2,1)",
               minHeight: "100%",
               display: "flex",
               flexDirection: "column",
+              overflowY: "auto",
             }}
           >
             {/* Back button — sticky */}
@@ -348,11 +395,36 @@ function MobileVehiclePanel({ isOpen }) {
               <div className="flex flex-col gap-2.5">
                 {selectedVehicle.links.map((link, li) => (
                   <a
-                    key={li} href={selectedVehicle.href}
-                    className="flex items-center justify-center gap-2 py-3.5 text-[11px] font-bold tracking-widest uppercase"
-                    style={link.primary ? { background: "#fff", color: "#05101e" } : { border: "1px solid rgba(255,255,255,0.18)", color: "rgba(255,255,255,0.62)" }}
+                    key={li} 
+                    href={selectedVehicle.href}
+                    className="flex items-center justify-center gap-2 py-3.5 text-[11px] font-bold tracking-widest uppercase transition-all duration-200"
+                    style={
+                      link.primary 
+                        ? { 
+                            background: "#fff", 
+                            color: "#05101e",
+                            border: "1px solid #fff"
+                          } 
+                        : { 
+                            border: "1px solid rgba(255,255,255,0.18)", 
+                            color: "rgba(255,255,255,0.62)",
+                            background: "transparent"
+                          }
+                    }
+                    onMouseEnter={e => {
+                      if (!link.primary) {
+                        e.currentTarget.style.background = "rgba(255,255,255,0.1)";
+                        e.currentTarget.style.color = "#fff";
+                      }
+                    }}
+                    onMouseLeave={e => {
+                      if (!link.primary) {
+                        e.currentTarget.style.background = "transparent";
+                        e.currentTarget.style.color = "rgba(255,255,255,0.62)";
+                      }
+                    }}
                   >
-                    {link.primary ? <ArrowRight size={11} /> : <ChevRight size={9} />}{link.label}
+                    {link.label} <ArrowRight size={12} />
                   </a>
                 ))}
               </div>
@@ -475,11 +547,12 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  // Lock body scroll when mobile menu open
+  // Lock body scroll when mobile menu OR desktop vehicles dropdown is open
   useEffect(() => {
-    document.body.style.overflow = mobileOpen ? "hidden" : "";
+    // Prevent body scroll when mobile menu is open OR desktop vehicles dropdown is open
+    document.body.style.overflow = (mobileOpen || vehiclesOpen) ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
-  }, [mobileOpen]);
+  }, [mobileOpen, vehiclesOpen]);
 
   // Auto-focus search input
   useEffect(() => {
@@ -627,14 +700,24 @@ export default function Navbar() {
 
       {/* ── Mobile Menu Drawer ── */}
       <div
-        className="lg:hidden overflow-y-auto transition-all duration-300 ease-in-out"
+        className="lg:hidden overflow-hidden transition-all duration-300 ease-in-out fixed left-0 right-0"
         style={{
-          maxHeight: mobileOpen ? "calc(100svh - 62px)" : "0px",
+          maxHeight: mobileOpen ? "calc(100vh - 62px)" : "0px",
           opacity: mobileOpen ? 1 : 0,
           pointerEvents: mobileOpen ? "all" : "none",
+          top: "62px",
+          bottom: 0,
+          zIndex: 40,
+          overflowY: "auto",
         }}
       >
-        <div style={{ background: "rgba(4,9,20,0.98)", backdropFilter: "blur(18px)", WebkitBackdropFilter: "blur(18px)", borderTop: "1px solid rgba(255,255,255,0.07)" }}>
+        <div style={{ 
+          background: "rgba(4,9,20,0.98)", 
+          backdropFilter: "blur(18px)", 
+          WebkitBackdropFilter: "blur(18px)", 
+          borderTop: "1px solid rgba(255,255,255,0.07)",
+          minHeight: "100%",
+        }}>
           {/* Nav rows */}
           <div>
             {navLinks.map((link) => (
@@ -658,7 +741,6 @@ export default function Navbar() {
                     onClick={() => setMobileOpen(false)}
                   >
                     {link.label}
-                    <ChevRight size={12} />
                   </a>
                 )}
               </div>
@@ -670,7 +752,6 @@ export default function Navbar() {
               onClick={() => setMobileOpen(false)}
             >
               <span className="flex items-center gap-2"><MapPin /> Find a Dealer</span>
-              <ChevRight size={12} />
             </a>
           </div>
 
@@ -682,16 +763,6 @@ export default function Navbar() {
             <button className="flex-1 py-3.5 text-[11px] font-bold tracking-widest uppercase flex items-center justify-center gap-2" style={{ border: "1px solid rgba(255,255,255,0.25)", color: "rgba(255,255,255,0.82)" }}>
               <SearchIcon size={13} /> Search
             </button>
-          </div>
-
-          {/* Footer strip */}
-          <div className="px-5 pb-5 pt-1 flex items-center justify-between" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-            <p className="text-[9px] tracking-wider uppercase" style={{ color: "rgba(255,255,255,0.18)" }}>© 2026 AyamForce Motors</p>
-            <div className="flex items-center gap-4">
-              {["Privacy", "Legal", "Sitemap"].map(l => (
-                <a key={l} href="#" className="text-[9px] tracking-wider uppercase" style={{ color: "rgba(255,255,255,0.22)" }}>{l}</a>
-              ))}
-            </div>
           </div>
         </div>
       </div>

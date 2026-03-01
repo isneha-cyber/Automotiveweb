@@ -4,12 +4,14 @@ import Footer from './components/Footer'
 import VehiclePage from './pages/VehicledetailPage'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import HomePage from './pages/HomePage'
+import Backtotop from './components/Backtotop'
 
 function App() {
   return (
     <>
     <BrowserRouter>
     <Navbar/>
+    <Backtotop/>
     <Routes>
         <Route path="/" element={<HomePage/>} />
       <Route path="/detailpage" element={<VehiclePage/>} />
