@@ -161,7 +161,7 @@ export default function TrustedBanner() {
       `}</style>
 
       {/* OUTER WRAPPER */}
-      <div className="trusted-body bg-[#080f1a]">
+      <div className="trusted-body bg-[#05141f] sm:py-24 py-12">
     
         {/* BANNER SECTION */}
         <div
@@ -192,7 +192,7 @@ export default function TrustedBanner() {
           </div>
 
           {/* CONTENT - with py-24 */}
-          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 lg:py-24">
+          <div className="relative z-10 px-4 sm:px-6 lg:px-12 py-16 sm:py-20 lg:py-24">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8 lg:gap-12">
               
               {/* LEFT: Headline */}

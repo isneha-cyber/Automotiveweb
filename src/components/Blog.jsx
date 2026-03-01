@@ -29,7 +29,7 @@ const posts = [
 function BlogCard({ post }) {
   return (
     <article className="group h-full overflow-hidden bg-white border border-gray-200 transition-all duration-300 hover:shadow-lg">
-      <div className="overflow-hidden w-full aspect-[4/3]">
+      <div className="overflow-hidden w-full aspect-[7/4]">
         <img
           src={post.image}
           alt={post.title}

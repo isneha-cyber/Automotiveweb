@@ -1,9 +1,8 @@
 import { useState, useRef, useEffect } from "react";
-import gsap from "gsap";
 
 // ── Icons ──────────────────────────────────────────────
-const ChevronDown = () => (
-  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+const ChevronDown = ({ size = 12 }) => (
+  <svg width={size} height={size} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="2 4 6 8 10 4" />
   </svg>
 );
@@ -34,22 +33,159 @@ const CloseIcon = () => (
     <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
   </svg>
 );
+const ArrowRight = () => (
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
+  </svg>
+);
 
+// ── Vehicle Data ──────────────────────────────────────
+const vehicleData = {
+  "SUV / CUV / MPV": [
+    { name: "Soul", price: "$20,490", href: "/soul" },
+    { name: "Seltos", price: "$23,790", href: "/seltos" },
+    { name: "Sportage", price: "$28,790", href: "/sportage" },
+    { name: "Sorento", price: "$32,390", href: "/sorento" },
+    { name: "Carnival MPV", price: "$37,390", href: "/carnival-mpv" },
+    { name: "Telluride", price: "$39,190", href: "/telluride" },
+  ],
+  "Hybrid / Electric": [
+    { name: "Niro Hybrid", price: "$27,390", href: "/niro" },
+    { name: "Sportage Hybrid", price: "$30,490", href: "/sportage-hybrid" },
+    { name: "Niro Plug-in Hybrid", price: "$34,490", href: "/niro-plug-in-hybrid" },
+    { name: "Sorento Hybrid", price: "$38,890", href: "/sorento-hybrid" },
+    { name: "Niro EV", price: "$39,600", href: "/niro-ev" },
+    { name: "Sportage Plug-in Hybrid", price: "$40,490", href: "/sportage-plug-in-hybrid" },
+    { name: "Carnival MPV Hybrid", price: "$41,390", href: "/carnival-mpv-hybrid" },
+    { name: "EV6", price: "$42,900", href: "/ev6" },
+    { name: "Sorento Plug-in Hybrid", price: "$48,290", href: "/sorento-plug-in-hybrid" },
+    { name: "EV9", price: "$54,900", href: "/ev9" },
+  ],
+  "Sedan": [
+    { name: "K4", price: "$22,290", href: "/k4" },
+    { name: "K4 Hatchback", price: "$24,990", href: "/k4-hatchback" },
+    { name: "K5", price: "$27,490", href: "/k5" },
+  ],
+  "Upcoming": [
+    { name: "All-New Telluride Hybrid", price: "Coming Soon", href: "/next-telluride", upcoming: true },
+  ],
+};
+
+const tabs = ["SUV / CUV / MPV", "Hybrid / Electric", "Sedan", "Upcoming"];
+
+// ── Vehicle Dropdown Panel ─────────────────────────────
+function VehicleDropdown({ isOpen }) {
+  const [activeTab, setActiveTab] = useState("SUV / CUV / MPV");
+  const vehicles = vehicleData[activeTab] || [];
+
+  return (
+    <div
+      className="absolute top-full left-0 right-0 w-full overflow-hidden transition-all duration-300"
+      style={{
+        maxHeight: isOpen ? "520px" : "0px",
+        opacity: isOpen ? 1 : 0,
+        pointerEvents: isOpen ? "all" : "none",
+      }}
+    >
+      {/* Tab bar — white theme, full width */}
+      <div
+        style={{ background: "#f5f5f5", height: "56px", borderBottom: "1px solid rgba(0,0,0,0.1)" }}
+        className="flex items-center px-4 md:px-10 gap-0 overflow-x-auto w-full"
+      >
+        {tabs.map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className="relative whitespace-nowrap px-5 h-full text-sm font-medium tracking-wide transition-colors duration-200 flex-shrink-0"
+            style={{
+              color: activeTab === tab ? "#05101e" : "rgba(0,0,0,0.5)",
+              borderBottom: activeTab === tab ? "3px solid #05101e" : "3px solid transparent",
+              background: "transparent",
+            }}
+          >
+            {tab}
+          </button>
+        ))}
+
+        {/* Divider */}
+        <div className="mx-4 w-px h-5 flex-shrink-0" style={{ background: "rgba(0,0,0,0.15)" }} />
+
+        <a
+          href="/vehicles"
+          className="whitespace-nowrap px-4 h-full flex items-center gap-1.5 text-xs font-semibold tracking-widest uppercase flex-shrink-0 transition-colors duration-200"
+          style={{ color: "rgba(0,0,0,0.4)" }}
+          onMouseEnter={e => e.currentTarget.style.color = "#05101e"}
+          onMouseLeave={e => e.currentTarget.style.color = "rgba(0,0,0,0.4)"}
+        >
+          Show All <ArrowRight />
+        </a>
+      
+      </div>
+
+      {/* Vehicle grid — white bg, full width */}
+      <div
+        style={{ background: "#fff", borderTop: "1px solid rgba(0,0,0,0.06)" }}
+        className="px-6 md:px-10 py-6 w-full"
+      >
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+          {vehicles.map((v) => (
+            <a
+              key={v.name}
+              href={v.href}
+              className="group flex flex-col items-start p-3 rounded transition-colors duration-200"
+              style={{ background: "rgba(0,0,0,0.02)" }}
+              onMouseEnter={e => e.currentTarget.style.background = "rgba(0,0,0,0.06)"}
+              onMouseLeave={e => e.currentTarget.style.background = "rgba(0,0,0,0.02)"}
+            >
+              {/* Placeholder image area */}
+              <div
+                className="w-full mb-2 rounded flex items-center justify-center overflow-hidden"
+                style={{ height: "72px", background: "rgba(0,0,0,0.04)" }}
+              >
+                <span className="text-xs" style={{ color: "rgba(0,0,0,0.2)" }}>🚗</span>
+              </div>
+              <p
+                className="text-sm font-semibold leading-tight mb-1 group-hover:underline"
+                style={{ color: "#05101e" }}
+              >
+                {v.name}
+              </p>
+              <p
+                className="text-xs font-medium"
+                style={{ color: v.upcoming ? "rgba(0,0,0,0.35)" : "rgba(0,0,0,0.55)" }}
+              >
+                {v.upcoming ? v.price : `${v.price} starting MSRP*`}
+              </p>
+              {!v.upcoming && (
+                <div className="flex gap-3 mt-2">
+                  <span className="text-xs font-semibold tracking-wide" style={{ color: "rgba(0,0,0,0.4)" }}>Build</span>
+                  <span className="text-xs font-semibold tracking-wide" style={{ color: "rgba(0,0,0,0.4)" }}>Nearby</span>
+                </div>
+              )}
+            </a>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Main Navbar ────────────────────────────────────────
 const navLinks = [
-  
-  { label: "Vehicles", dropdown: true },
+  { label: "Vehicles", dropdown: "vehicles" },
   { label: "Price", dropdown: false },
   { label: "AyamForce Innovation", dropdown: true },
-  { label: "Blogs", dropdown: false, external: false },
-   { label: "Contact", dropdown: false },
+  { label: "Blogs", dropdown: false },
+  { label: "Contact", dropdown: false },
 ];
 
-const mobileNavLinks = ["Vehicles", "Price",  "AyamForce Innovation", "Blogs", "Contact", "Find a Dealer"];
+const mobileNavLinks = ["Vehicles", "Price", "AyamForce Innovation", "Blogs", "Contact", "Find a Dealer"];
 
-export default function Navbar({ navRef }) {
+export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const navbarRef = useRef(null);
+  const [vehiclesOpen, setVehiclesOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10);
@@ -57,135 +193,177 @@ export default function Navbar({ navRef }) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // GSAP Animation
+  // Close dropdown on outside click
   useEffect(() => {
-    if (navbarRef.current) {
-      // Initial animation when component mounts
-      gsap.to(navbarRef.current, {
-        opacity: 1,
-        duration: 0.8,
-        ease: "power2.out",
-        y: 0
-      });
-    }
+    const handler = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setVehiclesOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
   }, []);
-
-  // Animate mobile menu
-  useEffect(() => {
-    if (mobileOpen) {
-      gsap.fromTo(".mobile-menu",
-        { opacity: 0, y: -20 },
-        { opacity: 1, y: 0, duration: 0.3, ease: "power2.out" }
-      );
-    }
-  }, [mobileOpen]);
-
+//#05101e
   return (
-    <nav
-      ref={navbarRef}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled
-          ? "bg-[#05101e]/98 shadow-[0_2px_20px_rgba(0,0,0,0.4)]"
-          : "bg-[#05101e]"
-      }`}
-      style={{ opacity: 0, transform: "translateY(0)" }}
-    >
-      <div className="max-w-[1440px] mx-auto px-4 md:px-8">
-        <div className="flex items-center h-[56px] md:h-[62px]">
+    <div ref={dropdownRef} className="fixed top-0 left-0 right-0 z-50">
+      <nav
+        className="transition-all duration-300 w-full"
+        style={{
+          background: scrolled ? "rgba(5,16,30,0.98)" : "transparent",
+          boxShadow: scrolled ? "0 2px 20px rgba(0,0,0,0.4)" : "none",
+        }}
+      >
+        <div className="w-full px-4 md:px-10">
+          <div className="flex items-center" style={{ height: "62px" }}>
 
-          {/* ── Logo ── */}
-          <a href="/" className="flex-shrink-0 mr-4 md:mr-10">
-            <img
-              src="/logo2.png"
-              alt="Force Motors"
-              className="h-8 md:h-9 w-auto object-contain"
-            />
-          </a>
-
-          {/* ── Divider after logo ── */}
-          <div className="hidden lg:block w-[1px] h-6 bg-white/15 mr-8" />
-
-          {/* ── Desktop Nav Links ── */}
-          <div className="hidden lg:flex items-center gap-0 flex-1">
-            {navLinks.map((link) => (
-              <a
-                key={link.label}
-                href="/"
-                className="nav-item relative flex items-center gap-1.5 px-4 py-2 text-white/80 hover:text-white text-[13px] font-medium tracking-wide whitespace-nowrap group transition-colors duration-200"
+            {/* Logo */}
+            <a href="/" className="flex-shrink-0 mr-4 md:mr-10">
+              {/* <div
+                className="font-bold text-xl tracking-widest uppercase"
+                style={{ color: "#fff", letterSpacing: "0.15em" }}
               >
-                {link.label}
-                {link.external && <ExternalLink />}
-                {link.dropdown && <ChevronDown />}
-                {/* animated underline */}
-                <span className="nav-underline absolute bottom-0 left-4 right-4 w-0 h-[2px] bg-white transition-all duration-300 group-hover:w-[calc(100%-2rem)]" />
-              </a>
-            ))}
-          </div>
-
-          {/* ── Right Side Actions ── */}
-          <div className="hidden lg:flex items-center gap-2 ml-auto">
-            <a
-              href="#"
-              className="flex items-center gap-1.5 px-3 py-2 text-white/80 hover:text-white text-[13px] font-medium tracking-wide transition-colors duration-200"
-            >
-              <MapPin />
-              Find a Dealer
+                AYAMFORCE
+              </div> */}
+              <img className="w-12 h-12" src="/logo2.png" alt="" />
             </a>
-            <div className="w-[1px] h-5 bg-white/20 mx-1" />
-            <button className="flex items-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white text-[13px] font-medium tracking-wide transition-all duration-200 rounded-sm">
-              <SearchIcon />
-              Search
-            </button>
-          </div>
 
-          {/* ── Mobile Right Actions ── */}
-          <div className="flex lg:hidden items-center gap-1 ml-auto">
-            <button className="text-white/80 hover:text-white p-2 transition-colors">
-              <SearchIcon />
-            </button>
-            <button
-              className="text-white p-2 transition-colors"
-              onClick={() => setMobileOpen(!mobileOpen)}
-              aria-label="Toggle menu"
-            >
-              {mobileOpen ? <CloseIcon /> : <MenuIcon />}
-            </button>
+            {/* Divider */}
+            <div className="hidden lg:block w-px h-6 mr-8" style={{ background: "rgba(255,255,255,0.15)" }} />
+
+            {/* Desktop Nav */}
+            <div className="hidden lg:flex items-center gap-0 flex-1">
+              {navLinks.map((link) => (
+                link.dropdown === "vehicles" ? (
+                  <button
+                    key={link.label}
+                    onClick={() => setVehiclesOpen(!vehiclesOpen)}
+                    className="relative flex items-center gap-1.5 px-4 py-2 text-sm font-medium tracking-wide whitespace-nowrap group transition-colors duration-200"
+                    style={{ color: vehiclesOpen ? "#fff" : "rgba(255,255,255,0.8)" }}
+                  >
+                    {link.label}
+                    <span
+                      style={{
+                        display: "inline-flex",
+                        transition: "transform 0.2s",
+                        transform: vehiclesOpen ? "rotate(180deg)" : "rotate(0deg)",
+                      }}
+                    >
+                      <ChevronDown />
+                    </span>
+                    {/* Active underline */}
+                    {vehiclesOpen && (
+                      <span
+                        className="absolute bottom-0 left-4 right-4"
+                        style={{ height: "2px", background: "#fff" }}
+                      />
+                    )}
+                  </button>
+                ) : (
+                  <a
+                    key={link.label}
+                    href="#"
+                    className="relative flex items-center gap-1.5 px-4 py-2 text-sm font-medium tracking-wide whitespace-nowrap group transition-colors duration-200"
+                    style={{ color: "rgba(255,255,255,0.8)" }}
+                    onMouseEnter={e => e.currentTarget.style.color = "#fff"}
+                    onMouseLeave={e => e.currentTarget.style.color = "rgba(255,255,255,0.8)"}
+                  >
+                    {link.label}
+                    {link.dropdown && <ChevronDown />}
+                  </a>
+                )
+              ))}
+            </div>
+
+            {/* Right actions */}
+            <div className="hidden lg:flex items-center gap-2 ml-auto">
+              <a
+                href="#"
+                className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium tracking-wide transition-colors duration-200"
+                style={{ color: "rgba(255,255,255,0.8)" }}
+                onMouseEnter={e => e.currentTarget.style.color = "#fff"}
+                onMouseLeave={e => e.currentTarget.style.color = "rgba(255,255,255,0.8)"}
+              >
+                <MapPin />
+                Find a Dealer
+              </a>
+              <div className="w-px h-5 mx-1" style={{ background: "rgba(255,255,255,0.2)" }} />
+              <button
+                className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium tracking-wide transition-all duration-200"
+                style={{ background: "rgba(255,255,255,0.1)", color: "#fff" }}
+                onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.2)"}
+                onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.1)"}
+              >
+                <SearchIcon />
+                Search
+              </button>
+            </div>
+
+            {/* Mobile toggle */}
+            <div className="flex lg:hidden items-center gap-1 ml-auto">
+              <button className="p-2 transition-colors" style={{ color: "rgba(255,255,255,0.8)" }}>
+                <SearchIcon />
+              </button>
+              <button
+                className="p-2 transition-colors"
+                style={{ color: "#fff" }}
+                onClick={() => setMobileOpen(!mobileOpen)}
+                aria-label="Toggle menu"
+              >
+                {mobileOpen ? <CloseIcon /> : <MenuIcon />}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* ── Bottom border accent ── */}
-      <div className="h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        {/* Bottom accent */}
+        <div
+          className="h-px"
+          style={{ background: "linear-gradient(to right, transparent, rgba(255,255,255,0.1), transparent)" }}
+        />
+      </nav>
 
-      {/* ── Mobile Menu ── */}
+      {/* Vehicle Dropdown */}
+      <VehicleDropdown isOpen={vehiclesOpen} />
+
+      {/* Mobile Menu */}
       {mobileOpen && (
-        <div className="mobile-menu lg:hidden bg-[#05101e] border-t border-white/10 shadow-2xl">
-          <div className="max-w-[1440px] mx-auto px-4 py-2">
+        <div
+          className="lg:hidden border-t w-full"
+          style={{ background: "#05101e", borderColor: "rgba(255,255,255,0.1)", boxShadow: "0 8px 32px rgba(0,0,0,0.5)" }}
+        >
+          <div className="w-full px-4 py-2">
             {mobileNavLinks.map((link, i) => (
               <a
                 key={link}
                 href="#"
-                className={`flex items-center justify-between py-4 text-white/85 hover:text-white text-[15px] font-medium transition-colors duration-200 ${
-                  i !== mobileNavLinks.length - 1 ? "border-b border-white/10" : ""
-                }`}
+                className="flex items-center justify-between py-4 text-sm font-medium transition-colors duration-200"
+                style={{
+                  color: "rgba(255,255,255,0.85)",
+                  borderBottom: i !== mobileNavLinks.length - 1 ? "1px solid rgba(255,255,255,0.1)" : "none",
+                }}
                 onClick={() => setMobileOpen(false)}
               >
                 {link}
                 <ChevronDown />
               </a>
             ))}
-            {/* Mobile CTA */}
             <div className="py-4 flex gap-3">
-              <button className="flex-1 bg-white text-black text-[12px] font-bold tracking-widest uppercase py-3 rounded-sm">
+              <button
+                className="flex-1 text-xs font-bold tracking-widest uppercase py-3"
+                style={{ background: "#fff", color: "#000" }}
+              >
                 Find a Dealer
               </button>
-              <button className="flex-1 border border-white/40 text-white text-[12px] font-bold tracking-widest uppercase py-3 rounded-sm flex items-center justify-center gap-2">
+              <button
+                className="flex-1 text-xs font-bold tracking-widest uppercase py-3 flex items-center justify-center gap-2"
+                style={{ border: "1px solid rgba(255,255,255,0.4)", color: "#fff" }}
+              >
                 <SearchIcon /> Search
               </button>
             </div>
           </div>
         </div>
       )}
-    </nav>
+    </div>
   );
 }

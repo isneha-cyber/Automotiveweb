@@ -1,1 +1,35 @@
 @import "tailwindcss";
+/* @font-face {
+    font-family: 'designkbold';
+    src: url('/public/OnlineWebFonts_COM_5054692c446a984c638d4c9edd30503b/DesignK\ Bold/') format('woff2'),
+         url('/public/OnlineWebFonts_COM_5054692c446a984c638d4c9edd30503b/DesignK\ Bold/') format('woff'),
+         url('/public/OnlineWebFonts_COM_5054692c446a984c638d4c9edd30503b/DesignK\ Bold/') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+} */
+
+
+@font-face {
+    font-family: 'designkbold';
+    src: url('/public/OnlineWebFonts_COM_5054692c446a984c638d4c9edd30503b/DesignK Bold.ttf') format('truetype'),
+         url('/public/OnlineWebFonts_COM_5054692c446a984c638d4c9edd30503b/DesignK Bold.woff') format('woff'),
+         url('/public/OnlineWebFonts_COM_5054692c446a984c638d4c9edd30503b/DesignK Bold.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* h1,h2{
+    font-family: 'designkbold';
+} */
+
+h1, h2 {
+    font-family: 'Nunito', sans-serif;
+}
+
+h3,p{
+    font-family: 'Nunito', sans-serif;
+}
+
+.btn,a,span{
+   font-family: 'Nunito', sans-serif;
+}

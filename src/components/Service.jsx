@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 
 const cards = [
   {
@@ -28,9 +28,7 @@ function CardImage({ src, alt }) {
   if (errored) {
     return (
       <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
-        <span className="text-gray-400 text-[10px] sm:text-xs uppercase tracking-widest">
-          No Image
-        </span>
+        <span className="text-gray-400 text-xs uppercase tracking-widest">No Image</span>
       </div>
     );
   }
@@ -52,9 +50,7 @@ function HeroImage({ src, alt }) {
   if (errored) {
     return (
       <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-400 flex items-center justify-center">
-        <span className="text-gray-500 text-xs sm:text-sm uppercase tracking-widest">
-          Force Motors
-        </span>
+        <span className="text-gray-500 text-sm uppercase tracking-widest">Force Motors</span>
       </div>
     );
   }
@@ -68,82 +64,71 @@ function HeroImage({ src, alt }) {
         onError={() => setErrored(true)}
         loading="eager"
       />
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-300/40 via-transparent to-transparent pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-br from-black/10 via-transparent to-transparent pointer-events-none" />
     </>
   );
 }
 
-// Mobile Slider Component
 function MobileCardSlider({ cards }) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
-  const sliderRef = useRef(null);
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  const autoPlayRef = useRef(null);
 
-  const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % cards.length);
-  };
+  const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % cards.length);
+  const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + cards.length) % cards.length);
 
-  const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + cards.length) % cards.length);
-  };
+  useEffect(() => {
+    if (isAutoPlaying) {
+      autoPlayRef.current = setInterval(nextSlide, 5000);
+    }
+    return () => clearInterval(autoPlayRef.current);
+  }, [isAutoPlaying]);
 
-  // Touch handlers
   const handleTouchStart = (e) => {
     setTouchStart(e.targetTouches[0].clientX);
+    setIsAutoPlaying(false);
   };
 
-  const handleTouchMove = (e) => {
-    setTouchEnd(e.targetTouches[0].clientX);
-  };
+  const handleTouchMove = (e) => setTouchEnd(e.targetTouches[0].clientX);
 
   const handleTouchEnd = () => {
     if (!touchStart || !touchEnd) return;
-    
     const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > 50;
-    const isRightSwipe = distance < -50;
-
-    if (isLeftSwipe) {
-      nextSlide();
-    }
-    if (isRightSwipe) {
-      prevSlide();
-    }
-
+    if (distance > 50) nextSlide();
+    if (distance < -50) prevSlide();
     setTouchStart(null);
     setTouchEnd(null);
+    setTimeout(() => setIsAutoPlaying(true), 3000);
   };
 
   return (
-    <div className="sm:hidden">
+    <div className="sm:hidden relative">
       <div
-        ref={sliderRef}
-        className="overflow-hidden px-4"
+        className="overflow-hidden"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
         <div
-          className="flex transition-transform duration-300 ease-out"
+          className="flex transition-transform duration-500 ease-out"
           style={{ transform: `translateX(-${currentSlide * 100}%)` }}
         >
-          {cards.map((card, index) => (
-            <div key={card.key} className="w-full flex-shrink-0 px-2">
-              <div className="relative overflow-hidden bg-white border border-gray-100">
-                <div className="relative h-48 overflow-hidden bg-gray-100">
+          {cards.map((card) => (
+            <div key={card.key} className="w-full flex-shrink-0">
+              <div className="group relative overflow-hidden bg-white border border-gray-100">
+                <div className="relative h-52 overflow-hidden bg-gray-100">
                   <CardImage src={card.img} alt={card.title} />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
                 </div>
-
                 <div className="p-5">
-                  <h3 className="text-sm font-semibold text-gray-900 mb-2">
-                    {card.title}
-                  </h3>
-                  <p className="text-xs text-gray-500 leading-relaxed">
-                    {card.desc}
-                  </p>
-                  
-                 
+                  <h3 className="text-sm font-bold text-gray-900 mb-1.5 truncate">{card.title}</h3>
+                  <p className="text-xs text-gray-500 leading-relaxed mb-4 line-clamp-2">{card.desc}</p>
+                  <button className="inline-flex items-center text-xs font-semibold text-gray-900 tracking-wide group">
+                    Learn More
+                    <ArrowRight className="w-3.5 h-3.5 ml-1 transition-transform group-hover:translate-x-1" />
+                  </button>
                 </div>
               </div>
             </div>
@@ -151,26 +136,39 @@ function MobileCardSlider({ cards }) {
         </div>
       </div>
 
-      {/* Navigation Dots */}
-      <div className="flex justify-center gap-1.5 mt-6">
+      {/* Arrows */}
+      <button
+        onClick={prevSlide}
+        className="absolute left-2 top-[104px] -translate-y-1/2 w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full shadow-md flex items-center justify-center z-10"
+        aria-label="Previous slide"
+      >
+        <ChevronLeft className="w-4 h-4 text-gray-800" />
+      </button>
+      <button
+        onClick={nextSlide}
+        className="absolute right-2 top-[104px] -translate-y-1/2 w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full shadow-md flex items-center justify-center z-10"
+        aria-label="Next slide"
+      >
+        <ChevronRight className="w-4 h-4 text-gray-800" />
+      </button>
+
+      {/* Dots */}
+      <div className="flex justify-center gap-2 mt-5">
         {cards.map((_, index) => (
           <button
             key={index}
-            onClick={() => setCurrentSlide(index)}
-            className={`h-1.5 rounded-full transition-all duration-300 ${
-              currentSlide === index
-                ? "w-6 bg-gray-900"
-                : "w-1.5 bg-gray-300"
+            onClick={() => {
+              setCurrentSlide(index);
+              setIsAutoPlaying(false);
+              setTimeout(() => setIsAutoPlaying(true), 3000);
+            }}
+            className={`transition-all duration-300 rounded-full ${
+              currentSlide === index ? "w-8 h-2 bg-gray-900" : "w-2 h-2 bg-gray-300 hover:bg-gray-400"
             }`}
             aria-label={`Go to slide ${index + 1}`}
           />
         ))}
       </div>
-
-      {/* Slide Counter */}
-      <p className="text-center text-[10px] text-gray-400 mt-2">
-        {currentSlide + 1} / {cards.length}
-      </p>
     </div>
   );
 }
@@ -179,78 +177,85 @@ export default function Service() {
   const [hovered, setHovered] = useState(null);
 
   return (
-    <div className="min-h-screen bg-white font-sans py-12 sm:py-24 px-12">
-      {/* Hero Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-        {/* Content Section */}
-        <div className="flex flex-col justify-center py-12 lg:py-14  order-2 lg:order-1">
-          <div className="mb-4 sm:mb-6">
-            <p className="text-xs sm:text-sm tracking-wide text-gray-800">
-              <span className="font-bold text-black">AYAM FORCE</span>
-              <span className="font-light text-gray-500 ml-1">MOTORS</span>
+    <div className="min-h-screen bg-white font-sans">
+      {/* ── Hero ── */}
+      <section className="px-4 sm:px-6 lg:px-12 pt-12 sm:pt-20 pb-0">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-10 items-stretch">
+
+          {/* Left: Copy — spans 2 of 5 columns on lg */}
+          <div className="lg:col-span-2 flex flex-col justify-center py-4 lg:py-10 order-2 lg:order-1">
+            {/* Brand tag */}
+            <p className="text-xs tracking-widest uppercase mb-4">
+              <span className="font-bold text-gray-900">Ayam Force</span>
+              <span className="font-light text-gray-400 ml-1">Motors</span>
             </p>
-            <p className="text-[9px] sm:text-[11px] text-gray-400 mt-1 tracking-[0.18em] uppercase">
+
+            {/* Sub-label */}
+            <p className="text-[11px] text-gray-400 tracking-[0.22em] uppercase mb-5">
               Built For The Journey Ahead.
             </p>
+
+            {/* Headline */}
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-light leading-snug text-gray-900 mb-8 max-w-sm">
+              Advanced Engineering With Precision-Crafted Interiors And Intelligent Features,
+              Making Your Force Motors Vehicle The Perfect Companion For Work And Adventure.
+            </h1>
+
+            {/* CTA */}
+            <button className="w-fit border border-gray-900 text-gray-900 text-[10px] tracking-[0.2em] uppercase px-6 py-3 hover:bg-gray-900 hover:text-white transition-all duration-300 font-medium">
+              Learn More
+            </button>
+
+            {/* Stats — visible on all breakpoints */}
+            <div className="grid grid-cols-3 gap-6 mt-10 pt-8 border-t border-gray-100">
+              {[
+                { value: "25+", label: "Years" },
+                { value: "50+", label: "Dealers" },
+                { value: "10k+", label: "Vehicles" },
+              ].map(({ value, label }) => (
+                <div key={label}>
+                  <p className="text-2xl font-bold text-gray-900">{value}</p>
+                  <p className="text-[10px] text-gray-400 uppercase tracking-widest mt-0.5">{label}</p>
+                </div>
+              ))}
+            </div>
           </div>
 
-          <h1 className="text-lg sm:text-xl lg:text-2xl xl:text-3xl leading-relaxed lg:leading-snug 
-                       font-light text-gray-900 mb-6 lg:mb-10 max-w-xl">
-            Advanced Engineering Meets Rugged Reliability With Precision-Crafted
-            Interiors And Intelligent Features That Adapt To Every Terrain, Making
-            Your Force Motors Vehicle The Perfect Companion For Work And Adventure.
-          </h1>
-
-          <button className="w-fit border border-gray-800 text-gray-800 text-[10px] sm:text-[11px] 
-                           tracking-[0.18em] uppercase px-4 sm:px-5 py-2.5 
-                           hover:bg-gray-900 hover:text-white transition-all duration-300">
-            Learn More
-          </button>
+          {/* Right: Hero image — spans 3 of 5 columns on lg */}
+          <div className="lg:col-span-3 order-1 lg:order-2">
+            <div className="relative overflow-hidden w-full h-56 sm:h-80 lg:h-[560px]">
+              <HeroImage src="/images/gurkha2.jpg" alt="Force Motors Gurkha" />
+            </div>
+          </div>
         </div>
+      </section>
 
-        {/* Hero Image */}
-        <div className="relative overflow-hidden min-h-[250px] sm:min-h-[300px] lg:min-h-[520px] order-1 lg:order-2">
-          <HeroImage src="/images/gurkha2.jpg" alt="Force Motors Gurkha" />
-        </div>
-      </div>
-
-      {/* Cards Section */}
-      <div className="mt-8 sm:mt-12 ">
-        {/* Desktop Grid (hidden on mobile) */}
-        <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 border-t border-gray-100 gap-12">
-          {cards.map((card, i) => (
+      {/* ── Cards ── */}
+      <section className="px-4 sm:px-6 lg:px-12 mt-14 sm:mt-20 pb-16 sm:pb-24">
+        {/* Desktop grid */}
+        <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+          {cards.map((card) => (
             <div
               key={card.key}
-              className="relative overflow-hidden cursor-pointer group border-b border-gray-100 
-                        sm:border-b-0 last:border-b-0"
-              style={{
-                borderRight: i < cards.length - 1 ? "1px solid #f0f0f0" : "none",
-              }}
+              className="group relative overflow-hidden bg-white border border-gray-100 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer"
               onMouseEnter={() => setHovered(card.key)}
               onMouseLeave={() => setHovered(null)}
             >
-              <div className="relative h-48 sm:h-56 lg:h-64 overflow-hidden bg-gray-100">
+              <div className="relative h-52 sm:h-56 lg:h-64 overflow-hidden bg-gray-100">
                 <CardImage src={card.img} alt={card.title} />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               </div>
 
-              <div className="p-4 sm:p-5 lg:p-6 bg-white">
-                <h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-1 sm:mb-2">
-                  {card.title}
-                </h3>
-                <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">
-                  {card.desc}
-                </p>
-                
-                {/* Desktop Learn More Link (hidden on mobile) */}
-                {/* <button className="mt-3 sm:mt-4 text-[10px] uppercase tracking-wider text-gray-900 
-                                 font-medium opacity-0 group-hover:opacity-100 transition-opacity
-                                 flex items-center gap-1">
+              <div className="p-6">
+                <h3 className="text-sm font-bold text-gray-900 mb-2 truncate">{card.title}</h3>
+                <p className="text-sm text-gray-500 leading-relaxed mb-4 line-clamp-2">{card.desc}</p>
+                <button className="inline-flex items-center text-xs font-semibold text-gray-900 tracking-wide opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   Learn More
-                  <span className="text-sm">→</span>
-                </button> */}
+                  <ArrowRight className="w-3.5 h-3.5 ml-1 transition-transform group-hover:translate-x-1" />
+                </button>
               </div>
 
-              {/* Hover Indicator Line */}
+              {/* Bottom reveal line */}
               <div
                 className="absolute bottom-0 left-0 h-0.5 bg-gray-900 transition-all duration-500"
                 style={{ width: hovered === card.key ? "100%" : "0%" }}
@@ -259,16 +264,9 @@ export default function Service() {
           ))}
         </div>
 
-        {/* Mobile Slider */}
+        {/* Mobile slider */}
         <MobileCardSlider cards={cards} />
-      </div>
-
-      {/* Mobile View All Link (optional) */}
-      <div className="text-center mt-8 sm:hidden">
-        <button className="text-xs text-gray-600 underline underline-offset-4">
-          View all services →
-        </button>
-      </div>
+      </section>
     </div>
   );
 }
